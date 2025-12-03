@@ -1085,12 +1085,16 @@ with tabs[4]:
 # --------------------------------------------------------
 @st.cache_resource
 def train_logistic_model(df: pd.DataFrame):
+    # Always start by copying the input data
+    model_df = df.copy()
+
+    # === MODEL FEATURE SET ===
     # Numeric predictors
     num_features = [
         "InvoiceAmount",
         "TermsDays",
         "InvoiceMonthNum",
-        "DaysToCollect",   # optional – you can drop this if you want to avoid leakage
+        # "DaysToCollect",  # uncomment only if you're okay with using realized delay
     ]
 
     # Categorical predictors
@@ -1098,9 +1102,9 @@ def train_logistic_model(df: pd.DataFrame):
         "WB_Category",
         "FirmSizeProxy",
     ]
-  
-# debug 
-    st.write("Model Debug:")
+
+    # DEBUG
+    st.write("Model debug:")
     st.write("Data columns:", model_df.columns.tolist())
     st.write("Numeric features:", num_features)
     st.write("Categorical features:", cat_features)
@@ -1109,10 +1113,11 @@ def train_logistic_model(df: pd.DataFrame):
     if missing:
         st.error(f"The following model features are missing from the dataframe: {missing}")
         st.stop()
-    num_features = ["InvoiceAmount", "TermsDays", "InvoiceYear", "InvoiceMonthNum"]
-    cat_features = ["WB_Category", "FirmSizeProxy"]
+    # ------------------------------------------
 
+    # Use only confirmed features
     X = model_df[num_features + cat_features]
+    y = model_df["LateFlag"]
 
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y
@@ -1235,6 +1240,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
