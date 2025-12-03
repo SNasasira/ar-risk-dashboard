@@ -67,7 +67,7 @@ def load_data(path: str) -> pd.DataFrame:
 # ----------------------------
 # FILE PATH 
 # ----------------------------
-DATA_PATH = "ar_ledger_50000_wb_calibrated.csv"
+DATA_PATH = "ar_ledger_calibrated.csv"
 
 df = load_data(DATA_PATH)
 
@@ -1179,6 +1179,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
