@@ -70,7 +70,12 @@ def load_data(path: str) -> pd.DataFrame:
 DATA_PATH = "ar_ledger_calibrated.csv"
 
 df = load_data(DATA_PATH)
-
+# Ensure LateFlag exists even if missing in uploaded dataset
+if "LateFlag" not in df.columns:
+    if "DaysLate" in df.columns:
+        df["LateFlag"] = (df["DaysLate"] > 0).astype(int)
+    else:
+        df["LateFlag"] = 0  # fallback safe default
 
 # ===========================
 # FILTERS (with Reset)
@@ -165,11 +170,16 @@ st.sidebar.download_button(
 # ===========================
 # KPIs (use filtered data)
 # ===========================
-def compute_kpis(data: pd.DataFrame):
-    total_amt = data["InvoiceAmount"].sum()
-    late_rate = data["LateFlag"].mean() * 100 if len(data) > 0 else 0.0
-    avg_days_late = data.loc[data["LateFlag"] == 1, "DaysLate"].mean()
-    dso_proxy = data["DaysToCollect"].mean()
+def compute_kpis(data):
+    # Safe access – no crash if column missing
+    late_rate = data.get("LateFlag", pd.Series([0]*len(data))).mean() * 100 if len(data) > 0 else 0
+
+    avg_days_late = data.get("DaysLate", pd.Series([0]*len(data))).mean() if len(data) > 0 else 0
+
+    dso_proxy = data.get("DaysToCollect", pd.Series([0]*len(data))).mean() if len(data) > 0 else 0
+
+    total_amt = data.get("InvoiceAmount", pd.Series([0]*len(data))).sum()
+
     return total_amt, late_rate, avg_days_late, dso_proxy
 
 
@@ -1179,6 +1189,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
