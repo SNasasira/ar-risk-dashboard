@@ -1084,10 +1084,21 @@ with tabs[4]:
 # TAB 5: PREDICTIVE INSIGHTS (LOGISTIC REGRESSION)
 # --------------------------------------------------------
 @st.cache_resource
-def train_logistic_model(full_df: pd.DataFrame):
-    model_df = full_df.copy()
-    y = model_df["LateFlag"]
-    
+def train_logistic_model(df: pd.DataFrame):
+    # Numeric predictors
+    num_features = [
+        "InvoiceAmount",
+        "TermsDays",
+        "InvoiceMonthNum",
+        "DaysToCollect",   # optional – you can drop this if you want to avoid leakage
+    ]
+
+    # Categorical predictors
+    cat_features = [
+        "WB_Category",
+        "FirmSizeProxy",
+    ]
+  
 # debug 
     st.write("Model Debug:")
     st.write("Data columns:", model_df.columns.tolist())
@@ -1224,6 +1235,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
