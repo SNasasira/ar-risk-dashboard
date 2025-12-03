@@ -70,13 +70,38 @@ def load_data(path: str) -> pd.DataFrame:
 DATA_PATH = "ar_ledger_calibrated.csv"
 
 df = load_data(DATA_PATH)
-# Ensure LateFlag exists even if missing in uploaded dataset
+# Create LateFlag if missing
 if "LateFlag" not in df.columns:
     if "DaysLate" in df.columns:
         df["LateFlag"] = (df["DaysLate"] > 0).astype(int)
     else:
-        df["LateFlag"] = 0  # fallback safe default
+        df["LateFlag"] = 0
 
+# Create DaysToCollect if missing
+if "DaysToCollect" not in df.columns:
+    if "InvoiceDate" in df.columns and "PaymentDate" in df.columns:
+        df["DaysToCollect"] = (df["PaymentDate"] - df["InvoiceDate"]).dt.days
+    else:
+        df["DaysToCollect"] = 0
+
+# Create AgingBucket if missing
+if "AgingBucket" not in df.columns:
+    def aging_bucket(d):
+        if d <= 0:
+            return "Current/On-time"
+        elif d <= 30:
+            return "1–30"
+        elif d <= 60:
+            return "31–60"
+        elif d <= 90:
+            return "61–90"
+        else:
+            return "90+"
+
+    if "DaysLate" in df.columns:
+        df["AgingBucket"] = df["DaysLate"].apply(aging_bucket)
+    else:
+        df["AgingBucket"] = "Unknown"
 # ===========================
 # FILTERS (with Reset)
 # ===========================
@@ -1189,6 +1214,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
