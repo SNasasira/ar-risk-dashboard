@@ -42,20 +42,12 @@ TERMS_BLUE = "#1f77b4"
 def load_data(path: str) -> pd.DataFrame:
     df = pd.read_csv(
         path,
-        parse_dates=["InvoiceDate", "DueDate", "PaymentDate"],
+        parse_dates=["InvoiceDate", "DueDate", "PaymentDate"]
     )
 
-    # Basic flags and derived fields
-    df["LateFlag"] = (df["DaysLate"] > 0).astype(int)
-    df["Status"] = np.where(df["LateFlag"] == 1, "Late", "On-time")
-
-    df["DaysToCollect"] = (df["PaymentDate"] - df["InvoiceDate"]).dt.days
-
-    df["InvoiceMonth"] = df["InvoiceDate"].dt.to_period("M").dt.to_timestamp()
-    df["InvoiceYear"] = df["InvoiceDate"].dt.year
     df["InvoiceMonthNum"] = df["InvoiceDate"].dt.month
 
-    # Simple aging bucket (can be overridden later)
+    # Aging bucket
     def aging_bucket(d):
         if d <= 0:
             return "Current/On-time"
@@ -69,13 +61,16 @@ def load_data(path: str) -> pd.DataFrame:
             return "90+"
 
     df["AgingBucket"] = df["DaysLate"].apply(aging_bucket)
-
     return df
 
 
-# upload data
-DATA_PATH = "data/ar_ledger_50000_wb_calibrated.csv"
+# ----------------------------
+# FILE PATH 
+# ----------------------------
+DATA_PATH = "ar_ledger_50000_wb_calibrated.csv"
+
 df = load_data(DATA_PATH)
+
 
 # ===========================
 # FILTERS (with Reset)
@@ -1184,5 +1179,6 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
