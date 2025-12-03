@@ -1105,9 +1105,6 @@ def train_logistic_model(df: pd.DataFrame):
 
     # DEBUG
     st.write("Model debug:")
-    st.write("Data columns:", model_df.columns.tolist())
-    st.write("Numeric features:", num_features)
-    st.write("Categorical features:", cat_features)
 
     missing = [c for c in (num_features + cat_features) if c not in model_df.columns]
     if missing:
@@ -1240,6 +1237,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
