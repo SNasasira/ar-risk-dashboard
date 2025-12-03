@@ -1087,7 +1087,17 @@ with tabs[4]:
 def train_logistic_model(full_df: pd.DataFrame):
     model_df = full_df.copy()
     y = model_df["LateFlag"]
+    
+# debug 
+    st.write("Model Debug:")
+    st.write("Data columns:", model_df.columns.tolist())
+    st.write("Numeric features:", num_features)
+    st.write("Categorical features:", cat_features)
 
+    missing = [c for c in (num_features + cat_features) if c not in model_df.columns]
+    if missing:
+        st.error(f"The following model features are missing from the dataframe: {missing}")
+        st.stop()
     num_features = ["InvoiceAmount", "TermsDays", "InvoiceYear", "InvoiceMonthNum"]
     cat_features = ["WB_Category", "FirmSizeProxy"]
 
@@ -1214,6 +1224,7 @@ with tabs[5]:
         st.caption(
             "The model highlights structurally riskier sectors, which can inform credit limits and collection prioritization."
         )
+
 
 
 
